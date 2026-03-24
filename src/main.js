@@ -3,9 +3,21 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-import { Galaxy } from './Galaxy.js';
+import { SolarSystem } from './SolarSystem.js';
 import { Player } from './Player.js';
 import { CameraController } from './CameraController.js';
+import { io } from 'socket.io-client';
+
+// --- Network Setup ---
+const socket = io(); // Connects to the host server running on the same port
+
+socket.on('connect', () => {
+  console.log('Connected to server with ID:', socket.id);
+});
+
+socket.on('server_full', (data) => {
+  alert(data.message);
+});
 
 // --- Scene Setup ---
 const scene = new THREE.Scene();
@@ -57,20 +69,20 @@ window.addEventListener('resize', () => {
 });
 
 // --- Game Objects Setup ---
-const galaxy = new Galaxy(scene, 100000); // Pass in scene and number of stars
+const solarSystem = new SolarSystem(scene);
 
 const player = new Player(scene);
+// Give the player reference to celestial bodies for collision later
+player.celestialBodies = solarSystem.celestialBodies;
+
+// Callback for server notification on destruction
+player.onExplode = () => {
+  socket.emit('player_destroyed');
+};
 
 const cameraController = new CameraController(camera, player);
 cameraController.currentPosition.copy(camera.position);
 cameraController.currentQuaternion.copy(camera.quaternion);
-
-// Add simple lighting for the player mesh
-const ambientLight = new THREE.AmbientLight(0x404040, 2);
-scene.add(ambientLight);
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(100, 100, 100);
-scene.add(directionalLight);
 
 
 // --- Main Render Loop ---
@@ -82,11 +94,111 @@ function animate() {
   // Cap delta time to prevent large jumps if the tab is inactive
   const delta = Math.min(clock.getDelta(), 0.1);
 
-  galaxy.update(delta);
+  solarSystem.update(delta);
   player.update(delta);
   cameraController.update(delta);
 
+  // Send local state to server
+  if (socket.connected) {
+    socket.emit('player_update', {
+      position: player.position,
+      quaternion: {
+        x: player.quaternion.x,
+        y: player.quaternion.y,
+        z: player.quaternion.z,
+        w: player.quaternion.w
+      },
+      thrusting: player.keys.w
+    });
+  }
+
+  // Interpolate remote players
+  for (const id in remotePlayers) {
+    const remote = remotePlayers[id];
+    // Interpolate positions to smooth out tick rate (client-side prediction/interpolation)
+    remote.mesh.position.lerp(remote.targetPosition, 0.1);
+    remote.mesh.quaternion.slerp(remote.targetQuaternion, 0.1);
+
+    // Quick engine visual for remote players
+    if (remote.thrusting) {
+        // Just make them glow a bit for simplicity in this example
+        remote.mesh.material.emissive.setHex(0x44aaff);
+    } else {
+        remote.mesh.material.emissive.setHex(0x000000);
+    }
+  }
+
   composer.render();
+}
+
+// --- Multiplayer State Management ---
+const remotePlayers = {}; // Map id -> { mesh, targetPosition, targetQuaternion, thrusting }
+
+function createRemotePlayerMesh() {
+  const geometry = new THREE.ConeGeometry(2, 5, 8);
+  geometry.rotateX(Math.PI / 2);
+  const material = new THREE.MeshStandardMaterial({ color: 0xff5555, wireframe: true });
+  return new THREE.Mesh(geometry, material);
+}
+
+socket.on('init_state', (playersData) => {
+  for (const id in playersData) {
+    if (id !== socket.id) {
+      addRemotePlayer(playersData[id]);
+    } else {
+      // Local player init (if server assigns start pos)
+      const data = playersData[id];
+      player.position.copy(data.position);
+      player.quaternion.copy(data.quaternion);
+    }
+  }
+});
+
+socket.on('player_joined', (playerData) => {
+  if (playerData.id !== socket.id) {
+    addRemotePlayer(playerData);
+  }
+});
+
+socket.on('player_left', (id) => {
+  if (remotePlayers[id]) {
+    scene.remove(remotePlayers[id].mesh);
+    delete remotePlayers[id];
+  }
+});
+
+socket.on('game_state_update', (playersData) => {
+  for (const id in playersData) {
+    if (id !== socket.id && remotePlayers[id]) {
+      const data = playersData[id];
+      remotePlayers[id].targetPosition.copy(data.position);
+      remotePlayers[id].targetQuaternion.copy(data.quaternion);
+      remotePlayers[id].thrusting = data.thrusting;
+    }
+  }
+});
+
+socket.on('respawn', (data) => {
+  player.position.copy(data.position);
+  player.quaternion.copy(data.quaternion);
+  player.velocity.set(0, 0, 0);
+  player.angularVelocity.set(0, 0, 0);
+});
+
+function addRemotePlayer(data) {
+  if (!remotePlayers[data.id]) {
+    const mesh = createRemotePlayerMesh();
+    mesh.position.copy(data.position);
+    mesh.quaternion.copy(data.quaternion);
+    scene.add(mesh);
+
+    remotePlayers[data.id] = {
+      mesh: mesh,
+      targetPosition: new THREE.Vector3().copy(data.position),
+      targetQuaternion: new THREE.Quaternion().copy(data.quaternion),
+      thrusting: data.thrusting
+    };
+  }
 }
 
 animate();

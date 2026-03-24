@@ -1,29 +1,36 @@
-# 3D Milky Way Exploration Game
+# 3D Solar System Exploration Game
 
-A data-driven 3D space exploration game set in the Milky Way, featuring hyper-realistic physics, cinematic graphics, and environments based on real astronomical data.
+A multiplayer 3D space exploration game restricted to our Solar System, featuring strict Newtonian physics, procedural textures, realistic scales, and a Node.js/Socket.io backend.
 
 ## Features
 
-- **Data-Driven Environment**: Galaxy generated mimicking the Gaia DR3 catalog, complete with spiral arms, dense galactic center, and correct star color temperatures.
-- **High-Performance Rendering**: Renders 100,000+ stars efficiently at 60+ FPS using custom shaders and buffer geometries.
-- **Cinematic Graphics**: Advanced post-processing pipeline featuring HDR rendering, high-quality anti-aliasing, and subtle bloom.
-- **Realistic Newtonian Physics**: Player movement governed by strict Newtonian mechanics (thrust, inertia, mass, and zero-drag coasting).
-- **Smooth Camera Movement**: Custom quaternion-based camera controller providing butter-smooth, cinematic easing without gimbal lock.
+- **Newtonian Flight Model**: Zero-drag space physics, where the SpaceX Starship has mass, inertia, and no auto-braking.
+- **Multiplayer Backend**: Node.js and Socket.io server (port 3000) supporting up to 10 concurrent players synchronized at 60 tick-rate.
+- **Procedural Solar System**: Dynamically generated Sun, 8 major planets, and the Moon with relatively scaled distances and sizes.
+- **Cinematic Graphics**: Advanced post-processing pipeline featuring HDR rendering, high-quality anti-aliasing, Unreal Bloom for the Sun, and Mach diamond engine trails.
+- **Collision Physics**: Bounding sphere detection. Crashing into celestial bodies results in immediate destruction and respawning.
 
-## How to Run the Dev Server
+## How to Run the Application
 
-This project uses Vite for lightning-fast development.
+You must start the backend server and the frontend development server separately.
 
 1. Ensure you have Node.js installed.
 2. Install the dependencies:
    ```bash
    npm install
    ```
-3. Start the development server:
+
+3. Start the multiplayer backend server (required for the frontend to connect):
+   ```bash
+   node server.js
+   # Or alternatively: npm start
+   ```
+
+4. In a separate terminal, start the Vite development frontend server:
    ```bash
    npm run dev
    ```
-4. Open your browser to the URL provided by Vite (typically `http://localhost:5173`).
+5. Open your browser to the URL provided by Vite (typically `http://localhost:5173`).
 
 ## Controls
 
