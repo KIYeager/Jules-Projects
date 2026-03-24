@@ -2,10 +2,15 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { io } from 'socket.io-client';
 
 import { Galaxy } from './Galaxy.js';
 import { Player } from './Player.js';
 import { CameraController } from './CameraController.js';
+
+// --- Socket.io Setup ---
+const socket = io();
+const otherPlayers = {};
 
 // --- Scene Setup ---
 const scene = new THREE.Scene();
@@ -72,9 +77,73 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(100, 100, 100);
 scene.add(directionalLight);
 
+// --- Multiplayer Client Logic ---
+function addOtherPlayer(playerInfo) {
+  // Use a simple cone for other players, identical to local player's shape
+  const geometry = new THREE.ConeGeometry(2, 5, 8);
+  geometry.rotateX(Math.PI / 2);
+  const material = new THREE.MeshStandardMaterial({
+    color: playerInfo.color,
+    wireframe: true
+  });
+
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(playerInfo.position.x, playerInfo.position.y, playerInfo.position.z);
+
+  scene.add(mesh);
+  otherPlayers[playerInfo.playerId] = mesh;
+}
+
+socket.on('currentPlayers', (players) => {
+  Object.keys(players).forEach((id) => {
+    if (id !== socket.id) {
+      // It's another player, add them with their id attached to info
+      players[id].playerId = id;
+      addOtherPlayer(players[id]);
+    }
+  });
+});
+
+socket.on('newPlayer', (playerData) => {
+  addOtherPlayer(playerData.playerInfo);
+});
+
+socket.on('playerMoved', (playerData) => {
+  const mesh = otherPlayers[playerData.playerId];
+  if (mesh) {
+    mesh.position.set(playerData.playerInfo.position.x, playerData.playerInfo.position.y, playerData.playerInfo.position.z);
+    mesh.quaternion.set(
+      playerData.playerInfo.quaternion.x,
+      playerData.playerInfo.quaternion.y,
+      playerData.playerInfo.quaternion.z,
+      playerData.playerInfo.quaternion.w
+    );
+  }
+});
+
+socket.on('playerDisconnected', (playerId) => {
+  const mesh = otherPlayers[playerId];
+  if (mesh) {
+    mesh.geometry.dispose();
+    mesh.material.dispose();
+    scene.remove(mesh);
+    delete otherPlayers[playerId];
+  }
+});
+
+socket.on('serverFull', (msg) => {
+  console.warn(msg);
+  alert(msg);
+});
+
 
 // --- Main Render Loop ---
 const clock = new THREE.Clock();
+
+// Variables for network sync throttling
+const tickRate = 20; // Emits per second
+const timeBetweenTicks = 1.0 / tickRate;
+let timeSinceLastTick = 0;
 
 function animate() {
   requestAnimationFrame(animate);
@@ -85,6 +154,16 @@ function animate() {
   galaxy.update(delta);
   player.update(delta);
   cameraController.update(delta);
+
+  // Sync player position at a fixed tick rate
+  timeSinceLastTick += delta;
+  if (timeSinceLastTick >= timeBetweenTicks) {
+    socket.emit('playerMovement', {
+      position: { x: player.position.x, y: player.position.y, z: player.position.z },
+      quaternion: { x: player.quaternion.x, y: player.quaternion.y, z: player.quaternion.z, w: player.quaternion.w }
+    });
+    timeSinceLastTick = 0;
+  }
 
   composer.render();
 }

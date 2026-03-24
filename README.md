@@ -10,20 +10,24 @@ A data-driven 3D space exploration game set in the Milky Way, featuring hyper-re
 - **Realistic Newtonian Physics**: Player movement governed by strict Newtonian mechanics (thrust, inertia, mass, and zero-drag coasting).
 - **Smooth Camera Movement**: Custom quaternion-based camera controller providing butter-smooth, cinematic easing without gimbal lock.
 
-## How to Run the Dev Server
+## Multiplayer Mode
 
-This project uses Vite for lightning-fast development.
+Up to 10 players can explore the Milky Way together simultaneously.
 
 1. Ensure you have Node.js installed.
 2. Install the dependencies:
    ```bash
    npm install
    ```
-3. Start the development server:
+3. Build the static assets:
    ```bash
-   npm run dev
+   npm run build
    ```
-4. Open your browser to the URL provided by Vite (typically `http://localhost:5173`).
+4. Start the multiplayer server:
+   ```bash
+   npm start
+   ```
+5. Players can join by navigating to your machine's IP address on port `3000` (e.g., `http://192.168.1.5:3000`).
 
 ## Controls
 
