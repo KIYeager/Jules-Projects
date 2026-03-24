@@ -1,0 +1,42 @@
+
+> app@1.0.0 dev
+> vite
+
+
+  VITE v8.0.2  ready in 218 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+12:12:51 PM [vite] (client) page reload src/Galaxy.js
+12:12:54 PM [vite] (client) page reload src/main.js
+12:13:03 PM [vite] (client) page reload src/main.js
+12:13:08 PM [vite] (client) Pre-transform error: Failed to resolve import "three/addons/misc/Timer.js" from "src/main.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /app/src/main.js:5:23
+  3  |  import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+  4  |  import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+  5  |  import { Timer } from 'three/addons/misc/Timer.js';
+     |                         ^
+  6  |
+  7  |  import { Galaxy } from './Galaxy.js';
+12:13:08 PM [vite] Internal server error: Failed to resolve import "three/addons/misc/Timer.js" from "src/main.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /app/src/main.js:5:23
+  3  |  import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+  4  |  import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+  5  |  import { Timer } from 'three/addons/misc/Timer.js';
+     |                         ^
+  6  |
+  7  |  import { Galaxy } from './Galaxy.js';
+      at TransformPluginContext._formatLog (file:///app/node_modules/vite/dist/node/chunks/node.js:30246:39)
+      at TransformPluginContext.error (file:///app/node_modules/vite/dist/node/chunks/node.js:30243:14)
+      at normalizeUrl (file:///app/node_modules/vite/dist/node/chunks/node.js:27531:18)
+      at async file:///app/node_modules/vite/dist/node/chunks/node.js:27594:30
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (file:///app/node_modules/vite/dist/node/chunks/node.js:27562:4)
+      at async EnvironmentPluginContainer.transform (file:///app/node_modules/vite/dist/node/chunks/node.js:30035:14)
+      at async loadAndTransform (file:///app/node_modules/vite/dist/node/chunks/node.js:24164:26)
+      at async viteTransformMiddleware (file:///app/node_modules/vite/dist/node/chunks/node.js:24973:20)
+12:13:36 PM [vite] (client) page reload src/main.js
+12:54:50 PM [vite] (client) page reload src/main.js
+12:55:05 PM [vite] (client) page reload src/main.js
