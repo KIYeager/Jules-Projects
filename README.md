@@ -1,33 +1,31 @@
-# 3D Milky Way Exploration Game
+# 3D Multiplayer Solar System Exploration Game
 
-A data-driven 3D space exploration game set in the Milky Way, featuring hyper-realistic physics, cinematic graphics, and environments based on real astronomical data.
+A realistic 3D space exploration game featuring SpaceX Starship rockets, Newtonian physics, and a multiplayer experience.
 
 ## Features
+- **Strict Newtonian Physics**: 6-DOF movement with mass, inertia, and zero-drag coasting.
+- **Solar System Simulation**: The Sun, 8 planets, and major moons (Moon, Io, Europa, Ganymede, Callisto, Titan).
+- **Multiplayer**: Sync player states at 30Hz using Socket.io (up to 10 players).
+- **High-Fidelity VFX**: Unreal Bloom, engine exhaust particles, explosion effects, and camera shake.
 
-- **Data-Driven Environment**: Galaxy generated mimicking the Gaia DR3 catalog, complete with spiral arms, dense galactic center, and correct star color temperatures.
-- **High-Performance Rendering**: Renders 100,000+ stars efficiently at 60+ FPS using custom shaders and buffer geometries.
-- **Cinematic Graphics**: Advanced post-processing pipeline featuring HDR rendering, high-quality anti-aliasing, and subtle bloom.
-- **Realistic Newtonian Physics**: Player movement governed by strict Newtonian mechanics (thrust, inertia, mass, and zero-drag coasting).
-- **Smooth Camera Movement**: Custom quaternion-based camera controller providing butter-smooth, cinematic easing without gimbal lock.
-
-## How to Run the Dev Server
-
-This project uses Vite for lightning-fast development.
-
+## Installation
 1. Ensure you have Node.js installed.
-2. Install the dependencies:
+2. Clone this repository.
+3. Install the dependencies:
    ```bash
    npm install
    ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-4. Open your browser to the URL provided by Vite (typically `http://localhost:5173`).
+
+## Starting the Game
+To run the game, simply start the Node.js server:
+```bash
+node server.js
+```
+The game will be accessible at `http://localhost:3000` (or `http://YOUR_IP:3000`).
 
 ## Controls
-
-* **W / S**: Forward / Backward Thrust
-* **A / D**: Yaw Left / Right
-* **Q / E**: Roll Left / Right
-* **Up / Down Arrows**: Pitch Up / Down
+- **W / S**: Forward / Backward Thrust
+- **A / D**: Yaw Left / Right
+- **Q / E**: Roll Left / Right
+- **Up / Down Arrows**: Pitch Up / Down
+- **Note**: There is no auto-braking. Use "flip and burn" to slow down.

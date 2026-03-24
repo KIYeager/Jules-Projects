@@ -1,9 +1,10 @@
 {
   "name": "app",
   "version": "1.0.0",
-  "description": "this is blank",
-  "main": "index.js",
+  "description": "3D Multiplayer Solar System Exploration Game",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -16,12 +17,15 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/KIYeager/Jules-Projects/issues"
   },
   "homepage": "https://github.com/KIYeager/Jules-Projects#readme",
   "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
     "three": "^0.183.2"
   },
   "devDependencies": {
